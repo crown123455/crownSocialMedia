@@ -33,9 +33,13 @@ export function LoginForm() {
 
       if (data.user.id !== 'd7a5dff1-4e75-4f16-8e4b-dc1e7be7bf3d') {
         await supabase.auth.signOut();
+        document.cookie = 'crown_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
         throw new Error('عفواً، لا تملك صلاحية الدخول لهذه اللوحة');
       }
 
+      if (data.session) {
+        document.cookie = `crown_session=${data.session.access_token}; path=/; max-age=604800; secure`;
+      }
       success('تم تسجيل الدخول بنجاح');
       router.push('/dashboard');
     } catch (err: any) {

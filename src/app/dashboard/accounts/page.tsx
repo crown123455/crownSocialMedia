@@ -309,14 +309,24 @@ export default function SocialAccountsPage() {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowKeysConfig(!showKeysConfig)}
-            style={{ background: '#f8fafc', color: '#2563eb', border: '1px solid #bfdbfe', padding: '10px 18px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}
-          >
-            <span>🔑</span>
-            <span>{showKeysConfig ? 'إخفاء إعدادات مفاتيح الربط' : 'إدخال / تعديل مفاتيح الربط (API Keys)'}</span>
-          </button>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <button
+              type="button"
+              onClick={() => setShowKeysConfig(!showKeysConfig)}
+              style={{ background: '#f8fafc', color: '#2563eb', border: '1px solid #bfdbfe', padding: '10px 18px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}
+            >
+              <span>🔑</span>
+              <span>{showKeysConfig ? 'إخفاء إعدادات مفاتيح الربط' : 'إدخال / تعديل مفاتيح الربط (API Keys)'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => window.location.href = '/dashboard/integrations'}
+              style={{ background: '#eff6ff', color: '#1d4ed8', border: '1px solid #93c5fd', padding: '10px 18px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}
+            >
+              <span>📖</span>
+              <span>تعليمات وشرح الربط التلقائي</span>
+            </button>
+          </div>
         </div>
 
         {/* Inline API Keys Accordion Panel */}

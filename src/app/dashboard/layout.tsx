@@ -23,20 +23,23 @@ import {
   Bell,
   Plus,
   RefreshCw,
-  FileText
+  FileText,
+  Menu,
+  X
 } from 'lucide-react';
 import { TenantProvider, useTenant } from '@/store/TenantContext';
 import { CreatorSelector } from '@/components/ui/CreatorSelector';
+import { useState } from 'react';
 
 const navItems = [
-  { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-  { name: 'Creators', href: '/dashboard/creators', icon: Users },
-  { name: 'Social Accounts', href: '/dashboard/accounts', icon: Share2 },
-  { name: 'Publishing Studio', href: '/dashboard/studio', icon: Video },
-  { name: 'Planner Calendar', href: '/dashboard/planner', icon: Calendar },
-  { name: 'Post History', href: '/dashboard/history', icon: History },
-  { name: 'API Integrations', href: '/dashboard/integrations', icon: Settings },
-  { name: 'Advanced Scheduling', href: '/dashboard/settings', icon: Activity },
+  { name: 'نظرة عامة (Overview)', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'صناع المحتوى (Creators)', href: '/dashboard/creators', icon: Users },
+  { name: 'الحسابات (Accounts)', href: '/dashboard/accounts', icon: Share2 },
+  { name: 'النشر الذكي (Studio)', href: '/dashboard/studio', icon: Video },
+  { name: 'جدولة المنشورات (Planner)', href: '/dashboard/planner', icon: Calendar },
+  { name: 'تاريخ النشر (History)', href: '/dashboard/history', icon: History },
+  { name: 'إعدادات الربط التلقائي', href: '/dashboard/integrations', icon: Settings },
+  { name: 'إعدادات متقدمة', href: '/dashboard/settings', icon: Activity },
 ];
 
 const formatTime12Hour = (timeStr?: string) => {
@@ -55,17 +58,28 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { activeCreator, creatorSchedules } = useTenant();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const currentSchedule = activeCreator ? creatorSchedules[activeCreator.id] : null;
   const isScheduleActive = currentSchedule && currentSchedule.enabled;
 
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
   return (
     <div className={styles.container} dir="ltr">
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div className={styles.mobileOverlay} onClick={toggleMobileMenu}></div>
+      )}
+
       {/* Sidebar */}
-      <aside className={styles.sidebar}>
+      <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
         <div className={styles.logoArea}>
           <Crown className={styles.crownIcon} size={28} />
           <span className={styles.logoText}>Crown</span>
+          <button className={styles.closeMenuBtn} onClick={toggleMobileMenu}>
+            <X size={24} />
+          </button>
         </div>
         <nav className={styles.nav}>
           {navItems.map((item) => {
@@ -76,6 +90,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 key={item.name} 
                 href={item.href}
                 className={`${styles.navItem} ${isActive ? styles.navItemActive : ''}`}
+                onClick={() => setIsMobileMenuOpen(false)}
               >
                 <Icon size={20} />
                 {item.name}
@@ -90,21 +105,28 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         {/* Header */}
         <header className={styles.header}>
           <div className={styles.headerLeft}>
+            <button className={styles.menuToggleBtn} onClick={toggleMobileMenu}>
+              <Menu size={24} />
+            </button>
             <div className={styles.searchBar}>
               <Search size={18} className="text-gray" />
               <input 
                 type="text" 
-                placeholder="Search everything..." 
+                placeholder="Search..." 
                 className={styles.searchInput}
               />
             </div>
-            <CreatorSelector />
+            <div className={styles.creatorSelectWrapper}>
+              <CreatorSelector />
+            </div>
           </div>
           
           <div className={styles.headerRight}>
-            <Button variant="outline" size="sm">Workspace: Crown</Button>
+            <div className={styles.desktopOnly}>
+              <Button variant="outline" size="sm">Workspace: Crown</Button>
+            </div>
             <Button variant="primary" size="sm" onClick={() => router.push('/dashboard/studio')}>
-              <Plus size={16} /> Create Post
+              <Plus size={16} /> <span className={styles.hideOnMobile}>Create Post</span>
             </Button>
             <button className={styles.iconBtn} onClick={() => router.push('/dashboard/settings')} title="Advanced Scheduling">
               <Bell size={20} />

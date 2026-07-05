@@ -1,10 +1,10 @@
 {
   "GOOGLE_CLIENT_ID": "",
   "GOOGLE_CLIENT_SECRET": "",
-  "GOOGLE_REDIRECT_URI": "http://localhost:3000/api/auth/google/callback",
+  "GOOGLE_REDIRECT_URI": "",
   "META_CLIENT_ID": "",
   "META_CLIENT_SECRET": "",
   "TIKTOK_CLIENT_ID": "",
   "TIKTOK_CLIENT_SECRET": "",
-  "META_REDIRECT_URI": "http://localhost:3000/api/auth/meta/callback"
+  "META_REDIRECT_URI": ""
 }
