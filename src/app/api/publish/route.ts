@@ -256,10 +256,6 @@ export async function POST(request: Request) {
 
       let title = caption ? caption.split('\n')[0].slice(0, 95) : 'Crown Studio Video';
       let description = caption || '';
-      if (postType === 'SHORTS') {
-        if (!title.toLowerCase().includes('#shorts')) title += ' #shorts';
-        if (!description.toLowerCase().includes('#shorts')) description += '\n#shorts';
-      }
 
       // Step 1: Initiate resumable upload with YouTube Data API v3
       const initRes = await fetch('https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status', {

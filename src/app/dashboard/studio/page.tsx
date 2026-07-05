@@ -25,6 +25,7 @@ export default function PublishingStudioPage() {
   const [caption, setCaption] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [igCollabUsername, setIgCollabUsername] = useState('');
+  const [showCollabInput, setShowCollabInput] = useState(false);
   
   // AI State
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
@@ -658,7 +659,14 @@ export default function PublishingStudioPage() {
                                     background: platformConfig[`${accId}_kids`] === 'yes' ? '#eff6ff' : '#ffffff'
                                   }}>
                                     <div style={{ marginTop: '2px' }}>
-                                      <input type="checkbox" checked={platformConfig[`${accId}_kids`] === 'yes'} onChange={(e) => setConfig(`${accId}_kids`, e.target.checked ? 'yes' : 'no')} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#2563eb' }} />
+                                      <input type="checkbox" checked={platformConfig[`${accId}_kids`] === 'yes'} onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setPlatformConfig(prev => ({
+                                          ...prev,
+                                          [`${accId}_kids`]: checked ? 'yes' : 'no',
+                                          ...(checked ? { [`${accId}_18plus`]: 'no' } : {})
+                                        }));
+                                      }} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#2563eb' }} />
                                     </div>
                                     <div>
                                       <div style={{ fontSize: '14px', fontWeight: 'bold', color: platformConfig[`${accId}_kids`] === 'yes' ? '#1e40af' : '#334155' }}>مخصص للأطفال (Made for Kids)</div>
@@ -672,7 +680,14 @@ export default function PublishingStudioPage() {
                                     background: platformConfig[`${accId}_18plus`] === 'yes' ? '#fff7ed' : '#ffffff'
                                   }}>
                                     <div style={{ marginTop: '2px' }}>
-                                      <input type="checkbox" checked={platformConfig[`${accId}_18plus`] === 'yes'} onChange={(e) => setConfig(`${accId}_18plus`, e.target.checked ? 'yes' : 'no')} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#ea580c' }} />
+                                      <input type="checkbox" checked={platformConfig[`${accId}_18plus`] === 'yes'} onChange={(e) => {
+                                        const checked = e.target.checked;
+                                        setPlatformConfig(prev => ({
+                                          ...prev,
+                                          [`${accId}_18plus`]: checked ? 'yes' : 'no',
+                                          ...(checked ? { [`${accId}_kids`]: 'no' } : {})
+                                        }));
+                                      }} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#ea580c' }} />
                                     </div>
                                     <div>
                                       <div style={{ fontSize: '14px', fontWeight: 'bold', color: platformConfig[`${accId}_18plus`] === 'yes' ? '#9a3412' : '#334155' }}>تقييد الفئة العمرية (Age Restriction 18+)</div>
@@ -842,70 +857,87 @@ export default function PublishingStudioPage() {
                   </div>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 'bold', color: '#0f172a' }}>
-                      دعوة حساب للتعاون المشترك (Collaboration Invite)
+                      التعاون المشترك (Collaboration)
                     </h4>
-                    <span style={{ fontSize: '12px', color: '#64748b' }}>اختياري - متاح لجميع الحسابات المربوطة</span>
+                    <span style={{ fontSize: '12px', color: '#64748b' }}>إرسال دعوة لحساب آخر ليظهر المنشور عنده</span>
                   </div>
                 </div>
+                
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', background: '#ffffff', border: '1px solid #cbd5e1', padding: '6px 12px', borderRadius: '20px', transition: 'all 0.2s' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 'bold', color: '#334155' }}>إضافة دعوة (اختياري)</span>
+                  <input 
+                    type="checkbox" 
+                    checked={showCollabInput} 
+                    onChange={(e) => {
+                      setShowCollabInput(e.target.checked);
+                      if (!e.target.checked) setIgCollabUsername('');
+                    }}
+                    style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#2563eb' }}
+                  />
+                </label>
               </div>
 
-              <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', direction: 'ltr' }}>
-                <div style={{
-                  background: '#f1f5f9',
-                  border: '1px solid #cbd5e1',
-                  borderRight: 'none',
-                  borderRadius: '10px 0 0 10px',
-                  padding: '0 16px',
-                  color: '#475569',
-                  fontWeight: 'bold',
-                  fontSize: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '48px',
-                  userSelect: 'none'
-                }}>
-                  @
+              {showCollabInput && (
+                <div style={{ marginTop: '16px', animation: 'fadeIn 0.3s ease-in-out' }}>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', width: '100%', direction: 'ltr' }}>
+                    <div style={{
+                      background: '#f1f5f9',
+                      border: '1px solid #cbd5e1',
+                      borderRight: 'none',
+                      borderRadius: '10px 0 0 10px',
+                      padding: '0 16px',
+                      color: '#475569',
+                      fontWeight: 'bold',
+                      fontSize: '16px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '48px',
+                      userSelect: 'none'
+                    }}>
+                      @
+                    </div>
+                    <input 
+                      type="text"
+                      style={{
+                        width: '100%',
+                        height: '48px',
+                        padding: '0 16px',
+                        border: '1px solid #cbd5e1',
+                        borderRadius: '0 10px 10px 0',
+                        fontSize: '14px',
+                        color: '#0f172a',
+                        background: '#ffffff',
+                        outline: 'none',
+                        transition: 'border-color 0.2s, box-shadow 0.2s',
+                        direction: 'ltr',
+                        textAlign: 'left'
+                      }}
+                      placeholder="username (مثال: حساب شريك أو صانع محتوى آخر)"
+                      value={igCollabUsername}
+                      onChange={(e) => setIgCollabUsername(e.target.value)}
+                      onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)'; }}
+                      onBlur={(e) => { e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
+                    />
+                  </div>
+
+                  <div style={{ 
+                    background: '#eff6ff', 
+                    border: '1px solid #dbeafe', 
+                    borderRadius: '10px', 
+                    padding: '10px 14px', 
+                    marginTop: '12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '16px' }}>ℹ️</span>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#1e40af', lineHeight: '1.6', fontWeight: '500' }}>
+                      سيتم إرسال دعوة تعاون رسمية (Collaboration Invite) لهذا الحساب ليظهر المنشور ومشاركات التفاعل على صفحته أيضاً فور موافقته.
+                    </p>
+                  </div>
                 </div>
-                <input 
-                  type="text"
-                  style={{
-                    width: '100%',
-                    height: '48px',
-                    padding: '0 16px',
-                    border: '1px solid #cbd5e1',
-                    borderRadius: '0 10px 10px 0',
-                    fontSize: '14px',
-                    color: '#0f172a',
-                    background: '#ffffff',
-                    outline: 'none',
-                    transition: 'border-color 0.2s, box-shadow 0.2s',
-                    direction: 'ltr',
-                    textAlign: 'left'
-                  }}
-                  placeholder="username (مثال: حساب شريك أو صانع محتوى آخر)"
-                  value={igCollabUsername}
-                  onChange={(e) => setIgCollabUsername(e.target.value)}
-                  onFocus={(e) => { e.target.style.borderColor = '#2563eb'; e.target.style.boxShadow = '0 0 0 3px rgba(37,99,235,0.1)'; }}
-                  onBlur={(e) => { e.target.style.borderColor = '#cbd5e1'; e.target.style.boxShadow = 'none'; }}
-                />
-              </div>
-
-              <div style={{ 
-                background: '#eff6ff', 
-                border: '1px solid #dbeafe', 
-                borderRadius: '10px', 
-                padding: '10px 14px', 
-                marginTop: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span style={{ color: '#2563eb', fontWeight: 'bold', fontSize: '16px' }}>ℹ️</span>
-                <p style={{ margin: 0, fontSize: '12px', color: '#1e40af', lineHeight: '1.6', fontWeight: '500' }}>
-                  سيتم إرسال دعوة تعاون رسمية (Collaboration Invite) لهذا الحساب ليظهر المنشور ومشاركات التفاعل على صفحته أيضاً فور موافقته.
-                </p>
-              </div>
+              )}
             </div>
 
             {/* Scheduling */}
