@@ -199,17 +199,19 @@ export default function SocialAccountsPage() {
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCreatorId || !platform || !accountName || !username || !platformId || !accessToken) {
+    if (!selectedCreatorId || !platform || !username || !platformId || !accessToken) {
       error('Please fill in all required fields');
       return;
     }
+    
+    const displayAccountName = accountName || username;
 
     try {
       if (editingAccountId) {
         const { error: sbError } = await supabase.from('social_accounts').update({
           creator_id: selectedCreatorId,
           platform: platform as any,
-          account_name: accountName,
+          account_name: displayAccountName,
           username_or_channel_name: username,
           account_id: platformId,
           access_token: accessToken,
@@ -221,7 +223,7 @@ export default function SocialAccountsPage() {
           ...a, 
           creator_id: selectedCreatorId, 
           platform: platform as any, 
-          account_name: accountName, 
+          account_name: displayAccountName, 
           username_or_channel_name: username, 
           account_id: platformId, 
           platform_account_id: platformId,
@@ -234,7 +236,7 @@ export default function SocialAccountsPage() {
           id: crypto.randomUUID(),
           creator_id: selectedCreatorId,
           platform: platform as any,
-          account_name: accountName,
+          account_name: displayAccountName,
           username_or_channel_name: username,
           account_id: platformId,
           platform_account_id: platformId,
@@ -548,13 +550,6 @@ export default function SocialAccountsPage() {
                   { label: '-- اختر الصانع --', value: '' },
                   ...creators.map(c => ({ label: c.full_name, value: c.id }))
                 ]}
-                required
-              />
-              <Input 
-                label="اسم العرض للحساب (Account Display Name)" 
-                placeholder="مثال: Crown Official IG أو اسم الصفحة"
-                value={accountName}
-                onChange={e => setAccountName(e.target.value)}
                 required
               />
               <Input 
