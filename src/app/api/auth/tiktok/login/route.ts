@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
           <h3>الخطوات السريعة لتفعيل الزر التلقائي:</h3>
           <ol>
             <li>اذهب إلى <a href="https://developers.tiktok.com/" target="_blank" style="color: #38bdf8; font-weight: bold;">بوابة مطوري TikTok (TikTok for Developers)</a> وسجل دخولك وحسابك التجاري.</li>
-            <li>قم بإنشاء تطبيق جديد (Create an App) واختر الصلاحيات الأساسية: <span class="badge">user.info.basic</span> و <span class="badge">video.publish</span> و <span class="badge">video.upload</span>.</li>
+            <li>قم بإنشاء تطبيق جديد (Create an App) واختر الصلاحيات الأساسية: <span class="badge">user.info.basic</span> و <span class="badge">video.upload</span>.</li>
             <li>في إعدادات <strong>Redirect URI</strong> داخل تطبيق تيك توك، ضع هذا الرابط بالظبط:<br>
               <div class="box">${redirectUri}</div>
             </li>
@@ -59,8 +59,8 @@ export async function GET(req: NextRequest) {
   }
 
   const statePayload = `${creatorId}::tiktok`;
-  const scope = 'user.info.basic,video.publish,video.upload';
-  const tiktokAuthUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&scope=${encodeURIComponent(scope)}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(statePayload)}`;
+  const scope = 'user.info.basic,video.upload';
+  const tiktokAuthUrl = `https://www.tiktok.com/v2/auth/authorize/?client_key=${clientKey}&response_type=code&scope=${scope}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${encodeURIComponent(statePayload)}`;
 
   return NextResponse.redirect(tiktokAuthUrl);
 }
