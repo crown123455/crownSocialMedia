@@ -18,8 +18,9 @@ export default function PublishingStudioPage() {
   
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadedAsset, setUploadedAsset] = useState<{ id: string, url: string, type: string, name: string, rawFile?: File, geminiFileUri?: string } | null>(null);
-  
+
   const [selectedAccountIds, setSelectedAccountIds] = useState<string[]>([]);
   const [caption, setCaption] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -70,6 +71,7 @@ export default function PublishingStudioPage() {
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
     try {
       // 1. Request presigned URL from API
       const res = await fetch('/api/upload', {
@@ -81,14 +83,32 @@ export default function PublishingStudioPage() {
       const data = await res.json();
       if (!res.ok || data.error || !data.uploadUrl) throw new Error(data.error || 'فشل في الاتصال بخادم الرفع');
 
-      // 2. Upload file directly to Cloudflare R2
-      const uploadRes = await fetch(data.uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file
+      // 2. Upload file directly to Cloudflare R2 using XMLHttpRequest to track progress
+      await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
+        };
+        
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(xhr.response);
+          } else {
+            reject(new Error(`فشل رفع الملف إلى السيرفر السحابي (الخطأ: ${xhr.status})`));
+          }
+        };
+        
+        xhr.onerror = () => {
+          reject(new Error('خطأ في الشبكة أو CORS أثناء الرفع للسيرفر السحابي'));
+        };
+
+        xhr.open('PUT', data.uploadUrl, true);
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.send(file);
       });
-      
-      if (!uploadRes.ok) throw new Error('فشل رفع الملف إلى السيرفر السحابي (قد يكون حجم الملف كبيراً جداً)');
 
       const newAsset = {
         id: data.r2Key,
@@ -465,13 +485,23 @@ export default function PublishingStudioPage() {
                   accept="image/jpeg,image/png,video/mp4,video/quicktime"
                   onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}
                 />
-                <UploadCloud size={48} className="text-blue-500 mb-4 mx-auto" />
-                <h3 className="text-lg font-bold text-slate-800">
-                  {isUploading ? 'جاري الرفع للسيرفر السحابي...' : 'اختر أو اسحب فيديو هنا'}
-                </h3>
-                <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">
-                  يدعم فيديوهات MP4 أو الصور بجميع المقاسات للنشر الفوري والجدولة.
-                </p>
+                {isUploading ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '20px 0' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#eff6ff', color: '#2563eb', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                      <UploadCloud size={24} className="animate-bounce" />
+                    </div>
+                    <span style={{ color: '#0f172a', fontWeight: 'bold', fontSize: '16px' }}>جاري الرفع للسيرفر السحابي... {uploadProgress}%</span>
+                    <div style={{ width: '100%', maxWidth: '300px', height: '8px', background: '#e2e8f0', borderRadius: '4px', overflow: 'hidden' }}>
+                      <div style={{ width: `${uploadProgress}%`, height: '100%', background: '#2563eb', transition: 'width 0.2s ease-out' }}></div>
+                    </div>
+                    <span style={{ color: '#64748b', fontSize: '13px' }}>يرجى الانتظار، لا تقم بإغلاق الصفحة. الفيديوهات الكبيرة قد تستغرق بضع دقائق.</span>
+                  </div>
+                ) : (
+                  <>
+                    <h3 className="text-lg font-bold text-slate-800">اختر أو اسحب فيديو هنا</h3>
+                    <p className="text-sm text-slate-500 mt-2 max-w-xs mx-auto">يدعم فيديوهات MP4 أو الصور بجميع المقاسات للنشر الفوري والجدولة.</p>
+                  </>
+                )}
               </div>
             ) : (
               <div style={{ background: '#ffffff', borderRadius: '20px', border: '1px solid #e2e8f0', overflow: 'hidden', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.05)' }}>
