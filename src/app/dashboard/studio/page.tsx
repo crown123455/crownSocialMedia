@@ -73,50 +73,41 @@ export default function PublishingStudioPage() {
     setIsUploading(true);
     setUploadProgress(0);
     try {
-      const CHUNK_SIZE = 3.5 * 1024 * 1024; // 3.5MB per chunk (under Vercel's 4.5MB limit)
-      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
-      const sessionId = `upload_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      // 1. Get presigned URL from our API (small JSON request, no file)
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, contentType: file.type })
+      });
+      
+      const data = await res.json();
+      if (!res.ok || data.error || !data.uploadUrl) throw new Error(data.error || 'فشل في الحصول على رابط الرفع');
 
-      let finalData: any = null;
-
-      for (let i = 0; i < totalChunks; i++) {
-        const start = i * CHUNK_SIZE;
-        const end = Math.min(start + CHUNK_SIZE, file.size);
-        const chunkBlob = file.slice(start, end);
-
-        const formData = new FormData();
-        formData.append('chunk', chunkBlob, file.name);
-        formData.append('chunkIndex', String(i));
-        formData.append('totalChunks', String(totalChunks));
-        formData.append('sessionId', sessionId);
-        formData.append('filename', file.name);
-        formData.append('contentType', file.type);
-
-        const res = await fetch('/api/upload-chunk', {
-          method: 'POST',
-          body: formData,
-        });
-
-        const data = await res.json();
-        if (!res.ok || data.error) {
-          throw new Error(data.error || `فشل رفع الجزء ${i + 1} من ${totalChunks}`);
-        }
-
-        // Update progress
-        const progress = Math.round(((i + 1) / totalChunks) * 100);
-        setUploadProgress(progress);
-
-        if (data.done) {
-          finalData = data;
-        }
-      }
-
-      if (!finalData) {
-        throw new Error('لم يتم استلام تأكيد نهائي من السيرفر');
-      }
+      // 2. Upload file DIRECTLY from browser to Cloudflare R2 (bypasses Vercel completely)
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            setUploadProgress(Math.round((event.loaded / event.total) * 100));
+          }
+        };
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve();
+          } else {
+            reject(new Error(`فشل الرفع (كود ${xhr.status}). تأكد من إعدادات CORS في Cloudflare R2.`));
+          }
+        };
+        xhr.onerror = () => reject(new Error('فشل الاتصال بسيرفر التخزين. تحقق من اتصال الإنترنت.'));
+        xhr.ontimeout = () => reject(new Error('انتهت مهلة الرفع. حاول بملف أصغر.'));
+        xhr.timeout = 600000; // 10 minutes
+        xhr.open('PUT', data.uploadUrl, true);
+        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.send(file);
+      });
 
       const newAsset = {
-        id: finalData.r2Key,
+        id: data.r2Key,
         creator_id: activeCreator.id,
         file_name: file.name,
         file_size_bytes: file.size,
@@ -125,8 +116,8 @@ export default function PublishingStudioPage() {
         tags: [],
         uploaded_by: 'd7a5dff1-4e75-4f16-8e4b-dc1e7be7bf3d',
         created_at: new Date().toISOString(),
-        public_url: finalData.publicUrl,
-        r2_key: finalData.r2Key
+        public_url: data.publicUrl,
+        r2_key: data.r2Key
       };
 
       try {
@@ -139,8 +130,8 @@ export default function PublishingStudioPage() {
       setMedia(prev => [newAsset as any, ...prev]);
 
       setUploadedAsset({
-        id: finalData.r2Key,
-        url: finalData.publicUrl,
+        id: data.r2Key,
+        url: data.publicUrl,
         type: file.type,
         name: file.name,
         rawFile: file
