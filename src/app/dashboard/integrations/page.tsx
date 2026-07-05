@@ -253,6 +253,83 @@ CREATE POLICY "Allow admin access to system_settings" ON public.system_settings 
               </div>
             </div>
 
+            {/* META CARD */}
+            <div className={styles.platformCard} style={{ border: '1px solid #bfdbfe', background: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
+              <div className={styles.cardHeader}>
+                <div className={styles.platformTitle}>
+                  <div className={styles.platformIcon} style={{ background: '#eff6ff', color: '#2563eb', width: '48px', height: '48px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <span style={{ fontSize: '24px', fontWeight: 'bold' }}>🔵</span>
+                  </div>
+                  <div>
+                    <h3 style={{ color: '#0f172a', fontWeight: 'bold' }}>Meta API (FB/IG)</h3>
+                    <p style={{ color: '#64748b' }}>Facebook Pages & Instagram Publishing</p>
+                  </div>
+                </div>
+                <div className={`${styles.statusBadge} ${settings.META_CLIENT_ID ? styles.statusActive : styles.statusPending}`}>
+                  {settings.META_CLIENT_ID ? <><CheckCircle2 size={14} /> مفعّل وجاهز</> : <><AlertCircle size={14} /> بانتظار المفتاح</>}
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <div className={styles.label}>
+                  <span style={{ color: '#334155', fontWeight: '600' }}>Meta App ID (Client ID)</span>
+                  <a href="https://developers.facebook.com/apps/" target="_blank" className="text-blue-600 hover:underline text-xs flex items-center gap-1 font-semibold">
+                    بوابة Meta Developers <ExternalLink size={12} />
+                  </a>
+                </div>
+                <div className={styles.inputWrapper}>
+                  <input 
+                    type="text" 
+                    className={styles.input} 
+                    placeholder="مثال: 123456789012345"
+                    value={settings.META_CLIENT_ID || ''}
+                    onChange={e => setSettings({ ...settings, META_CLIENT_ID: e.target.value })}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <div className={styles.label}>
+                  <span style={{ color: '#334155', fontWeight: '600' }}>App Secret (Client Secret)</span>
+                  <span className="text-xs text-gray-500">سري جداً</span>
+                </div>
+                <div className={styles.inputWrapper}>
+                  <input 
+                    type={showMetaSecret ? 'text' : 'password'} 
+                    className={styles.input} 
+                    placeholder="••••••••••••••••••••••••••••••••"
+                    value={settings.META_CLIENT_SECRET || ''}
+                    onChange={e => setSettings({ ...settings, META_CLIENT_SECRET: e.target.value })}
+                  />
+                  <button 
+                    type="button" 
+                    className={styles.toggleBtn} 
+                    onClick={() => setShowMetaSecret(!showMetaSecret)}
+                  >
+                    {showMetaSecret ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+              </div>
+
+              <div className={styles.redirectBox}>
+                <div className={styles.redirectLabel}>
+                  <Lock size={12} className="text-blue-600" />
+                  <span>رابط تحويل Meta (Valid OAuth Redirect URIs):</span>
+                </div>
+                <div className={styles.redirectUrl}>
+                  <span>{metaRedirectUri}</span>
+                  <button 
+                    type="button" 
+                    className={styles.copyBtn} 
+                    onClick={() => copyToClipboard(metaRedirectUri, 'meta_uri')}
+                    style={{ position: 'static' }}
+                  >
+                    {copiedKey === 'meta_uri' ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* TIKTOK CARD */}
             <div className={styles.platformCard} style={{ border: '1px solid #fecdd3', background: '#ffffff', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
               <div className={styles.cardHeader}>
