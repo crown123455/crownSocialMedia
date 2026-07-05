@@ -71,16 +71,24 @@ export default function PublishingStudioPage() {
 
     setIsUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/upload-direct', {
+      // 1. Request presigned URL from API
+      const res = await fetch('/api/upload', {
         method: 'POST',
-        body: formData
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ filename: file.name, contentType: file.type })
       });
       
       const data = await res.json();
-      if (!res.ok || data.error) throw new Error(data.error || 'Upload failed');
+      if (!res.ok || data.error || !data.uploadUrl) throw new Error(data.error || 'فشل في الاتصال بخادم الرفع');
+
+      // 2. Upload file directly to Cloudflare R2
+      const uploadRes = await fetch(data.uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file
+      });
+      
+      if (!uploadRes.ok) throw new Error('فشل رفع الملف إلى السيرفر السحابي (قد يكون حجم الملف كبيراً جداً)');
 
       const newAsset = {
         id: data.r2Key,
@@ -401,7 +409,28 @@ export default function PublishingStudioPage() {
             </button>
           ))}
           {creatorAccounts.length === 0 && (
-            <span style={{ color: '#ef4444', fontSize: '14px', fontWeight: '600' }}>⚠️ لا توجد حسابات مربوطة لهذا الصانع. يرجى الذهاب لصفحة الحسابات وربطها أولاً!</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '12px', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '12px', width: '100%' }}>
+              <span style={{ color: '#ef4444', fontSize: '14px', fontWeight: '600' }}>⚠️ لا توجد حسابات مربوطة لهذا الصانع. يمكنك ربطها الآن فوراً بضغطة زر:</span>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = `/api/auth/meta/login?creator_id=${activeCreator.id}&filter=facebook`}
+                  style={{ background: '#1877f2', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}
+                >
+                  <span style={{ fontSize: '16px' }}>🔵</span> ربط صفحة Facebook
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = `/api/auth/meta/login?creator_id=${activeCreator.id}&filter=instagram`}
+                  style={{ background: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)', color: '#fff', border: 'none', padding: '8px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}
+                >
+                  <span style={{ fontSize: '16px' }}>📸</span> ربط حساب Instagram
+                </button>
+                <span style={{ fontSize: '12px', color: '#7f1d1d', alignSelf: 'center' }}>
+                  (رابط التحويل لـ Meta هو: <strong>https://crown-social-media.vercel.app/api/auth/meta/callback</strong>)
+                </span>
+              </div>
+            </div>
           )}
         </div>
 
