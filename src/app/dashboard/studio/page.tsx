@@ -73,45 +73,50 @@ export default function PublishingStudioPage() {
     setIsUploading(true);
     setUploadProgress(0);
     try {
-      // 1. Request presigned URL from API
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: file.name, contentType: file.type })
-      });
-      
-      const data = await res.json();
-      if (!res.ok || data.error || !data.uploadUrl) throw new Error(data.error || 'فشل في الاتصال بخادم الرفع');
+      const CHUNK_SIZE = 3.5 * 1024 * 1024; // 3.5MB per chunk (under Vercel's 4.5MB limit)
+      const totalChunks = Math.ceil(file.size / CHUNK_SIZE);
+      const sessionId = `upload_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 
-      // 2. Upload file directly to Cloudflare R2 using XMLHttpRequest to track progress
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.upload.onprogress = (event) => {
-          if (event.lengthComputable) {
-            const percentComplete = Math.round((event.loaded / event.total) * 100);
-            setUploadProgress(percentComplete);
-          }
-        };
-        
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve(xhr.response);
-          } else {
-            reject(new Error(`فشل رفع الملف إلى السيرفر السحابي (الخطأ: ${xhr.status})`));
-          }
-        };
-        
-        xhr.onerror = () => {
-          reject(new Error('خطأ في الشبكة أو CORS أثناء الرفع للسيرفر السحابي'));
-        };
+      let finalData: any = null;
 
-        xhr.open('PUT', data.uploadUrl, true);
-        xhr.setRequestHeader('Content-Type', file.type);
-        xhr.send(file);
-      });
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, file.size);
+        const chunkBlob = file.slice(start, end);
+
+        const formData = new FormData();
+        formData.append('chunk', chunkBlob, file.name);
+        formData.append('chunkIndex', String(i));
+        formData.append('totalChunks', String(totalChunks));
+        formData.append('sessionId', sessionId);
+        formData.append('filename', file.name);
+        formData.append('contentType', file.type);
+
+        const res = await fetch('/api/upload-chunk', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.error || `فشل رفع الجزء ${i + 1} من ${totalChunks}`);
+        }
+
+        // Update progress
+        const progress = Math.round(((i + 1) / totalChunks) * 100);
+        setUploadProgress(progress);
+
+        if (data.done) {
+          finalData = data;
+        }
+      }
+
+      if (!finalData) {
+        throw new Error('لم يتم استلام تأكيد نهائي من السيرفر');
+      }
 
       const newAsset = {
-        id: data.r2Key,
+        id: finalData.r2Key,
         creator_id: activeCreator.id,
         file_name: file.name,
         file_size_bytes: file.size,
@@ -120,8 +125,8 @@ export default function PublishingStudioPage() {
         tags: [],
         uploaded_by: 'd7a5dff1-4e75-4f16-8e4b-dc1e7be7bf3d',
         created_at: new Date().toISOString(),
-        public_url: data.publicUrl,
-        r2_key: data.r2Key
+        public_url: finalData.publicUrl,
+        r2_key: finalData.r2Key
       };
 
       try {
@@ -134,14 +139,14 @@ export default function PublishingStudioPage() {
       setMedia(prev => [newAsset as any, ...prev]);
 
       setUploadedAsset({
-        id: data.r2Key,
-        url: data.publicUrl,
+        id: finalData.r2Key,
+        url: finalData.publicUrl,
         type: file.type,
         name: file.name,
         rawFile: file
       });
       
-      success('File uploaded successfully!');
+      success('تم رفع الملف بنجاح! ✅');
     } catch (err: any) {
       console.error(err);
       error(`Upload Error: ${err.message}`);
