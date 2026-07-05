@@ -1,0 +1,154 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-black-text);
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  color: var(--color-gray-medium);
+  font-size: 15px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  border-bottom: var(--border-subtle);
+  padding-bottom: 12px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.metricsSelect {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.subTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-dark);
+}
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--color-black-text);
+  cursor: pointer;
+}
+
+.previewCard {
+  height: calc(100vh - 200px);
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-soft-white);
+}
+
+.previewHeader {
+  padding: 16px;
+  border-bottom: var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  background-color: var(--color-white);
+}
+
+.previewContent {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.emptyPreview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-gray-medium);
+  text-align: center;
+}
+
+.mockReport {
+  width: 100%;
+  max-width: 600px;
+  height: 100%;
+  background-color: var(--color-white);
+  border: var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.mockHeader {
+  text-align: center;
+  border-bottom: 2px solid var(--color-gold);
+  padding-bottom: 16px;
+}
+
+.mockHeader h2 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+
+.mockBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeletonLine {
+  height: 12px;
+  background-color: var(--color-soft-white);
+  border-radius: 4px;
+  width: 100%;
+}
+
+.skeletonLine:nth-child(2) {
+  width: 80%;
+}
+
+.skeletonBlock {
+  height: 150px;
+  background-color: var(--color-soft-white);
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 992px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

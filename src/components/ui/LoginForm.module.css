@@ -1,0 +1,67 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: var(--color-background);
+  padding: 20px;
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 440px;
+}
+
+.logoContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 32px;
+}
+
+.crownWrapper {
+  width: 72px;
+  height: 72px;
+  background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-gold);
+}
+
+.crownIcon {
+  color: var(--color-white);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-black-text);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: var(--color-gray-medium);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.actions {
+  margin-top: 8px;
+}
+
+.note {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--color-gray-medium);
+  font-style: italic;
+}

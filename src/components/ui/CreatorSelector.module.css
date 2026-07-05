@@ -1,0 +1,23 @@
+.container {
+  display: flex;
+  align-items: center;
+}
+
+.select {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: var(--border-subtle);
+  background-color: var(--color-white);
+  font-size: 14px;
+  color: var(--color-black-text);
+  font-weight: 500;
+  outline: none;
+  min-width: 200px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.select:focus {
+  border-color: var(--color-gold);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
