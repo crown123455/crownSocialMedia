@@ -613,28 +613,56 @@ export default function PublishingStudioPage() {
                           )}
 
                           {acc.platform === 'youtube' && (
-                            <div className="flex flex-col gap-3 w-full mt-2 pt-2 border-t border-gray-100">
-                              <div className="flex items-center gap-4 flex-wrap">
-                                <span className="text-xs font-bold text-gray-700">شكل العرض:</span>
-                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                  <input type="radio" name={`type_${accId}`} checked={platformConfig[accId] === 'VIDEO' || !platformConfig[accId]} onChange={() => setConfig(accId, 'VIDEO')} className="text-gold focus:ring-gold" /> فيديو قياسي (Standard)
-                                </label>
-                                <label className="flex items-center gap-1.5 text-sm cursor-pointer">
-                                  <input type="radio" name={`type_${accId}`} checked={platformConfig[accId] === 'SHORTS'} onChange={() => setConfig(accId, 'SHORTS')} className="text-gold focus:ring-gold" /> Shorts قصير
-                                </label>
+                            <div className="flex flex-col gap-4 w-full mt-3 pt-3 border-t border-gray-100">
+                              
+                              {/* Video Format (Standard vs Shorts) */}
+                              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                                <span className="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                  <Video size={16} className="text-red-600" /> شكل العرض (Format)
+                                </span>
+                                <div className="grid grid-cols-2 gap-3">
+                                  <label className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all ${platformConfig[accId] === 'VIDEO' || !platformConfig[accId] ? 'border-red-500 bg-red-50 text-red-700 shadow-sm' : 'border-gray-200 hover:border-red-200 hover:bg-gray-50 text-gray-600'}`}>
+                                    <input type="radio" name={`type_${accId}`} className="sr-only" checked={platformConfig[accId] === 'VIDEO' || !platformConfig[accId]} onChange={() => setConfig(accId, 'VIDEO')} />
+                                    <span className="font-bold text-sm mb-1">فيديو قياسي</span>
+                                    <span className="text-xs opacity-75">Standard Video</span>
+                                  </label>
+                                  <label className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all ${platformConfig[accId] === 'SHORTS' ? 'border-red-500 bg-red-50 text-red-700 shadow-sm' : 'border-gray-200 hover:border-red-200 hover:bg-gray-50 text-gray-600'}`}>
+                                    <input type="radio" name={`type_${accId}`} className="sr-only" checked={platformConfig[accId] === 'SHORTS'} onChange={() => setConfig(accId, 'SHORTS')} />
+                                    <span className="font-bold text-sm mb-1">Shorts قصير</span>
+                                    <span className="text-xs opacity-75">Vertical Video</span>
+                                  </label>
+                                </div>
                               </div>
 
-                              <div className="flex items-center gap-4 flex-wrap bg-red-50 p-3 rounded-xl border border-red-100">
-                                <span className="text-xs font-bold text-red-900">سياسة الخصوصية والأعمار (Privacy & Age):</span>
-                                <label className="flex items-center gap-1.5 text-xs text-red-800 cursor-pointer font-semibold">
-                                  <input type="checkbox" checked={platformConfig[`${accId}_18plus`] === 'yes'} onChange={(e) => setConfig(`${accId}_18plus`, e.target.checked ? 'yes' : 'no')} className="rounded text-red-600 focus:ring-red-500" />
-                                  تقييد المحتوى للفئة العمرية 18 سنة فما فوق (Age Restriction 18+)
-                                </label>
-                                <label className="flex items-center gap-1.5 text-xs text-red-800 cursor-pointer font-semibold">
-                                  <input type="checkbox" checked={platformConfig[`${accId}_kids`] === 'yes'} onChange={(e) => setConfig(`${accId}_kids`, e.target.checked ? 'yes' : 'no')} className="rounded text-red-600 focus:ring-red-500" />
-                                  مخصص للأطفال (Made for Kids)
-                                </label>
+                              {/* Privacy & Age Restrictions */}
+                              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                                <span className="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+                                  <UsersIcon size={16} className="text-blue-600" /> سياسة الجمهور (Audience & Age)
+                                </span>
+                                
+                                <div className="space-y-3">
+                                  <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${platformConfig[`${accId}_kids`] === 'yes' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                                    <div className="mt-0.5">
+                                      <input type="checkbox" checked={platformConfig[`${accId}_kids`] === 'yes'} onChange={(e) => setConfig(`${accId}_kids`, e.target.checked ? 'yes' : 'no')} className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
+                                    </div>
+                                    <div>
+                                      <div className={`text-sm font-bold ${platformConfig[`${accId}_kids`] === 'yes' ? 'text-blue-800' : 'text-gray-700'}`}>مخصص للأطفال (Made for Kids)</div>
+                                      <div className="text-xs text-gray-500 mt-1">يجب تحديد هذا الخيار إذا كان الفيديو يستهدف الأطفال حسب سياسات يوتيوب.</div>
+                                    </div>
+                                  </label>
+
+                                  <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${platformConfig[`${accId}_18plus`] === 'yes' ? 'border-orange-400 bg-orange-50' : 'border-gray-200 hover:bg-gray-50'}`}>
+                                    <div className="mt-0.5">
+                                      <input type="checkbox" checked={platformConfig[`${accId}_18plus`] === 'yes'} onChange={(e) => setConfig(`${accId}_18plus`, e.target.checked ? 'yes' : 'no')} className="w-4 h-4 rounded text-orange-600 focus:ring-orange-500" />
+                                    </div>
+                                    <div>
+                                      <div className={`text-sm font-bold ${platformConfig[`${accId}_18plus`] === 'yes' ? 'text-orange-800' : 'text-gray-700'}`}>تقييد الفئة العمرية (Age Restriction 18+)</div>
+                                      <div className="text-xs text-gray-500 mt-1">لا تعرض هذا الفيديو لمن هم دون 18 عاماً.</div>
+                                    </div>
+                                  </label>
+                                </div>
                               </div>
+                              
                             </div>
                           )}
 
