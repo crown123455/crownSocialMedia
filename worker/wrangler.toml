@@ -1,0 +1,10 @@
+name = "crown-upload-worker"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[vars]
+R2_ENDPOINT = "https://98a627dc8ed7f4c7a7271d35beae62d6.r2.cloudflarestorage.com"
+R2_BUCKET_NAME = "crown"
+R2_ACCESS_KEY_ID = "cf3035fb6458b5e9c529e66c52c7bf2c"
+R2_SECRET_ACCESS_KEY = "e2367be865d8a3ab992bf98d1d3e2193e1ca3bd9f745abf52addc5c5fccbf0ad"
+R2_PUBLIC_URL = "https://pub-73de3b65f6f44d2f9111dc7b9a879aea.r2.dev"

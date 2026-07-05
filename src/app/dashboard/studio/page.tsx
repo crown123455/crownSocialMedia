@@ -73,15 +73,15 @@ export default function PublishingStudioPage() {
     setIsUploading(true);
     setUploadProgress(0);
     try {
-      // 1. Get presigned URL from our API (small JSON request, no file)
-      const res = await fetch('/api/upload', {
+      // 1. Get presigned URL directly from Cloudflare Worker
+      const res = await fetch('https://crown-upload-worker.malekmajdi1124.workers.dev/presign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: file.name, contentType: file.type })
       });
       
       const data = await res.json();
-      if (!res.ok || data.error || !data.uploadUrl) throw new Error(data.error || 'فشل في الحصول على رابط الرفع');
+      if (!res.ok || data.error || !data.uploadUrl) throw new Error(data.error || 'فشل في الحصول على رابط الرفع من Cloudflare');
 
       // 2. Upload file DIRECTLY from browser to Cloudflare R2 (bypasses Vercel completely)
       await new Promise<void>((resolve, reject) => {
