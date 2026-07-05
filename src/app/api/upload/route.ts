@@ -1,8 +1,21 @@
 import { NextResponse } from 'next/server';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { r2Client } from '@/lib/r2';
+import { S3Client } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
+
+// Separate client for presigned URLs - no checksum (browser can't send it)
+const r2PresignClient = new S3Client({
+  region: 'auto',
+  endpoint: process.env.R2_ENDPOINT!,
+  forcePathStyle: true,
+  requestChecksumCalculation: 'WHEN_REQUIRED',
+  responseChecksumValidation: 'WHEN_REQUIRED',
+  credentials: {
+    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+  },
+});
 
 export async function POST(request: Request) {
   try {
@@ -14,7 +27,7 @@ export async function POST(request: Request) {
 
     // Generate unique key
     const extension = filename.split('.').pop();
-    const uniqueKey = `${uuidv4()}.${extension}`;
+    const uniqueKey = `uploads/${uuidv4()}.${extension}`;
 
     const command = new PutObjectCommand({
       Bucket: process.env.R2_BUCKET_NAME!,
@@ -23,7 +36,11 @@ export async function POST(request: Request) {
     });
 
     // Presigned URL expires in 15 minutes
-    const signedUrl = await getSignedUrl(r2Client, command, { expiresIn: 900 });
+    const signedUrl = await getSignedUrl(r2PresignClient, command, { 
+      expiresIn: 900,
+      unhoistableHeaders: new Set(['x-amz-checksum-crc32']),
+      signableHeaders: new Set(['host', 'content-type']),
+    });
     
     // The public URL that this file will have after upload
     const publicUrl = `${process.env.NEXT_PUBLIC_R2_DEV_URL}/${uniqueKey}`;
@@ -38,3 +55,4 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
+
