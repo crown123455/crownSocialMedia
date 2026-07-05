@@ -613,51 +613,70 @@ export default function PublishingStudioPage() {
                           )}
 
                           {acc.platform === 'youtube' && (
-                            <div className="flex flex-col gap-4 w-full mt-3 pt-3 border-t border-gray-100">
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #f1f5f9' }}>
                               
                               {/* Video Format (Standard vs Shorts) */}
-                              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                                <span className="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-                                  <Video size={16} className="text-red-600" /> شكل العرض (Format)
+                              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', color: '#1e293b', marginBottom: '12px' }}>
+                                  <Video size={16} color="#dc2626" /> شكل العرض (Format)
                                 </span>
-                                <div className="grid grid-cols-2 gap-3">
-                                  <label className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all ${platformConfig[accId] === 'VIDEO' || !platformConfig[accId] ? 'border-red-500 bg-red-50 text-red-700 shadow-sm' : 'border-gray-200 hover:border-red-200 hover:bg-gray-50 text-gray-600'}`}>
-                                    <input type="radio" name={`type_${accId}`} className="sr-only" checked={platformConfig[accId] === 'VIDEO' || !platformConfig[accId]} onChange={() => setConfig(accId, 'VIDEO')} />
-                                    <span className="font-bold text-sm mb-1">فيديو قياسي</span>
-                                    <span className="text-xs opacity-75">Standard Video</span>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                                  <label style={{ 
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                                    border: (platformConfig[accId] === 'VIDEO' || !platformConfig[accId]) ? '2px solid #ef4444' : '2px solid #e2e8f0',
+                                    background: (platformConfig[accId] === 'VIDEO' || !platformConfig[accId]) ? '#fef2f2' : '#ffffff',
+                                    color: (platformConfig[accId] === 'VIDEO' || !platformConfig[accId]) ? '#b91c1c' : '#475569'
+                                  }}>
+                                    <input type="radio" name={`type_${accId}`} style={{ display: 'none' }} checked={platformConfig[accId] === 'VIDEO' || !platformConfig[accId]} onChange={() => setConfig(accId, 'VIDEO')} />
+                                    <span style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' }}>فيديو قياسي</span>
+                                    <span style={{ fontSize: '12px', opacity: 0.75 }}>Standard Video</span>
                                   </label>
-                                  <label className={`flex flex-col items-center justify-center p-3 rounded-lg border-2 cursor-pointer transition-all ${platformConfig[accId] === 'SHORTS' ? 'border-red-500 bg-red-50 text-red-700 shadow-sm' : 'border-gray-200 hover:border-red-200 hover:bg-gray-50 text-gray-600'}`}>
-                                    <input type="radio" name={`type_${accId}`} className="sr-only" checked={platformConfig[accId] === 'SHORTS'} onChange={() => setConfig(accId, 'SHORTS')} />
-                                    <span className="font-bold text-sm mb-1">Shorts قصير</span>
-                                    <span className="text-xs opacity-75">Vertical Video</span>
+                                  
+                                  <label style={{ 
+                                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '12px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                                    border: platformConfig[accId] === 'SHORTS' ? '2px solid #ef4444' : '2px solid #e2e8f0',
+                                    background: platformConfig[accId] === 'SHORTS' ? '#fef2f2' : '#ffffff',
+                                    color: platformConfig[accId] === 'SHORTS' ? '#b91c1c' : '#475569'
+                                  }}>
+                                    <input type="radio" name={`type_${accId}`} style={{ display: 'none' }} checked={platformConfig[accId] === 'SHORTS'} onChange={() => setConfig(accId, 'SHORTS')} />
+                                    <span style={{ fontWeight: 'bold', fontSize: '14px', marginBottom: '4px' }}>Shorts قصير</span>
+                                    <span style={{ fontSize: '12px', opacity: 0.75 }}>Vertical Video</span>
                                   </label>
                                 </div>
                               </div>
 
                               {/* Privacy & Age Restrictions */}
-                              <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
-                                <span className="block text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-                                  <UsersIcon size={16} className="text-blue-600" /> سياسة الجمهور (Audience & Age)
+                              <div style={{ background: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
+                                <span style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', fontWeight: 'bold', color: '#1e293b', marginBottom: '12px' }}>
+                                  <UsersIcon size={16} color="#2563eb" /> سياسة الجمهور (Audience & Age)
                                 </span>
                                 
-                                <div className="space-y-3">
-                                  <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${platformConfig[`${accId}_kids`] === 'yes' ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                                    <div className="mt-0.5">
-                                      <input type="checkbox" checked={platformConfig[`${accId}_kids`] === 'yes'} onChange={(e) => setConfig(`${accId}_kids`, e.target.checked ? 'yes' : 'no')} className="w-4 h-4 rounded text-blue-600 focus:ring-blue-500" />
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                  <label style={{ 
+                                    display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                                    border: platformConfig[`${accId}_kids`] === 'yes' ? '1px solid #60a5fa' : '1px solid #e2e8f0',
+                                    background: platformConfig[`${accId}_kids`] === 'yes' ? '#eff6ff' : '#ffffff'
+                                  }}>
+                                    <div style={{ marginTop: '2px' }}>
+                                      <input type="checkbox" checked={platformConfig[`${accId}_kids`] === 'yes'} onChange={(e) => setConfig(`${accId}_kids`, e.target.checked ? 'yes' : 'no')} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#2563eb' }} />
                                     </div>
                                     <div>
-                                      <div className={`text-sm font-bold ${platformConfig[`${accId}_kids`] === 'yes' ? 'text-blue-800' : 'text-gray-700'}`}>مخصص للأطفال (Made for Kids)</div>
-                                      <div className="text-xs text-gray-500 mt-1">يجب تحديد هذا الخيار إذا كان الفيديو يستهدف الأطفال حسب سياسات يوتيوب.</div>
+                                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: platformConfig[`${accId}_kids`] === 'yes' ? '#1e40af' : '#334155' }}>مخصص للأطفال (Made for Kids)</div>
+                                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>يجب تحديد هذا الخيار إذا كان الفيديو يستهدف الأطفال حسب سياسات يوتيوب.</div>
                                     </div>
                                   </label>
 
-                                  <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-all ${platformConfig[`${accId}_18plus`] === 'yes' ? 'border-orange-400 bg-orange-50' : 'border-gray-200 hover:bg-gray-50'}`}>
-                                    <div className="mt-0.5">
-                                      <input type="checkbox" checked={platformConfig[`${accId}_18plus`] === 'yes'} onChange={(e) => setConfig(`${accId}_18plus`, e.target.checked ? 'yes' : 'no')} className="w-4 h-4 rounded text-orange-600 focus:ring-orange-500" />
+                                  <label style={{ 
+                                    display: 'flex', alignItems: 'flex-start', gap: '12px', padding: '12px', borderRadius: '8px', cursor: 'pointer', transition: 'all 0.2s',
+                                    border: platformConfig[`${accId}_18plus`] === 'yes' ? '1px solid #fb923c' : '1px solid #e2e8f0',
+                                    background: platformConfig[`${accId}_18plus`] === 'yes' ? '#fff7ed' : '#ffffff'
+                                  }}>
+                                    <div style={{ marginTop: '2px' }}>
+                                      <input type="checkbox" checked={platformConfig[`${accId}_18plus`] === 'yes'} onChange={(e) => setConfig(`${accId}_18plus`, e.target.checked ? 'yes' : 'no')} style={{ width: '16px', height: '16px', cursor: 'pointer', accentColor: '#ea580c' }} />
                                     </div>
                                     <div>
-                                      <div className={`text-sm font-bold ${platformConfig[`${accId}_18plus`] === 'yes' ? 'text-orange-800' : 'text-gray-700'}`}>تقييد الفئة العمرية (Age Restriction 18+)</div>
-                                      <div className="text-xs text-gray-500 mt-1">لا تعرض هذا الفيديو لمن هم دون 18 عاماً.</div>
+                                      <div style={{ fontSize: '14px', fontWeight: 'bold', color: platformConfig[`${accId}_18plus`] === 'yes' ? '#9a3412' : '#334155' }}>تقييد الفئة العمرية (Age Restriction 18+)</div>
+                                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>لا تعرض هذا الفيديو لمن هم دون 18 عاماً.</div>
                                     </div>
                                   </label>
                                 </div>
