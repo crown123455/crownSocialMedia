@@ -52,8 +52,8 @@ export function LoginForm() {
     <div className={styles.wrapper}>
       <Card padding="lg" className={styles.loginCard}>
         <div className={styles.logoContainer}>
-          <div className={styles.crownWrapper}>
-            <Crown size={40} className={styles.crownIcon} />
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+            <img src="/tiktok-app-icon.png" alt="Crown Logo" style={{ width: '64px', height: '64px', borderRadius: '14px', objectFit: 'cover', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }} />
           </div>
           <h1 className={styles.title}>Crown</h1>
           <p className={styles.subtitle}>تسجيل الدخول للوحة التحكم</p>

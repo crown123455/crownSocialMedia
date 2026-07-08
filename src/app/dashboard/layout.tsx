@@ -74,8 +74,8 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
       {/* Sidebar */}
       <aside className={`${styles.sidebar} ${isMobileMenuOpen ? styles.sidebarOpen : ''}`}>
-        <div className={styles.logoArea}>
-          <Crown className={styles.crownIcon} size={28} />
+        <div className={styles.logoArea} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src="/tiktok-app-icon.png" alt="Crown Logo" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
           <span className={styles.logoText}>Crown</span>
           <button className={styles.closeMenuBtn} onClick={toggleMobileMenu}>
             <X size={24} />

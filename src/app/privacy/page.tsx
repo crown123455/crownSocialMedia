@@ -10,8 +10,8 @@ export default function PrivacyPolicyPage() {
       {/* Header */}
       <header style={{ maxWidth: '900px', margin: '0 auto 40px auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '20px' }}>
         <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none', color: '#fff' }}>
-          <div style={{ background: 'linear-gradient(135deg, #d4af37, #f3e5ab)', padding: '10px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Crown size={28} color="#000" />
+          <div style={{ padding: '4px', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src="/tiktok-app-icon.png" alt="Crown Logo" style={{ width: '36px', height: '36px', borderRadius: '8px', objectFit: 'cover' }} />
           </div>
           <div>
             <h1 style={{ fontSize: '24px', fontWeight: '800', margin: 0, background: 'linear-gradient(135deg, #fff, #d4af37)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Crown SaaS</h1>

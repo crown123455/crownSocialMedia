@@ -23,8 +23,8 @@ export default function LandingPage() {
       {/* Navigation */}
       <nav className={styles.navbar}>
         <div className={styles.navContainer}>
-          <div className={styles.logo}>
-            <Crown className="text-gold" size={28} />
+          <div className={styles.logo} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <img src="/tiktok-app-icon.png" alt="Crown Logo" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
             <span className={styles.logoText}>Crown</span>
           </div>
           <div className={styles.navLinks}>
@@ -148,8 +148,8 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
-          <div className={styles.footerLogo}>
-            <Crown size={24} className="text-gold" />
+          <div className={styles.footerLogo} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <img src="/tiktok-app-icon.png" alt="Crown Logo" style={{ width: '28px', height: '28px', borderRadius: '6px', objectFit: 'cover' }} />
             <span>Crown</span>
           </div>
           <div className={styles.footerLinks}>
