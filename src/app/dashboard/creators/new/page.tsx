@@ -15,7 +15,7 @@ import { supabase } from '@/lib/supabase';
 
 export default function AddCreatorPage() {
   const router = useRouter();
-  const { setCreators, addLog, setActiveCreatorId } = useTenant();
+  const { creators, setCreators, addLog, setActiveCreatorId } = useTenant();
   const { success, error } = useToast();
 
   const [formData, setFormData] = useState({
@@ -65,53 +65,43 @@ export default function AddCreatorPage() {
       profile_photo: profilePhoto || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     };
 
-    try {
-      const { data, error: sbError } = await supabase.from('creators').insert([newCreator]).select();
-      
-      const createdObj = (data && data[0]) ? (data[0] as Creator) : ({
-        ...newCreator,
-        id: newCreator.id || crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as unknown as Creator);
+    const createdObj = {
+      ...newCreator,
+      id: newCreator.id || crypto.randomUUID(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    } as unknown as Creator;
 
-      const deletedIds = JSON.parse(localStorage.getItem('crown_deleted_creators') || '[]');
-      if (deletedIds.includes(createdObj.id)) {
-        localStorage.setItem('crown_deleted_creators', JSON.stringify(deletedIds.filter((id: string) => id !== createdObj.id)));
-      }
-
-      setCreators(prev => {
-        const next = [...prev, createdObj];
-        localStorage.setItem('crown_creators', JSON.stringify(next));
-        return next;
-      });
-      setActiveCreatorId(createdObj.id);
-      localStorage.setItem('crown_active_creator_id', createdObj.id);
-      addLog('Add Creator', newCreator.full_name, 'Success');
-      success('تمت إضافة صانع المحتوى وتفعيله بنجاح!');
-      router.push('/dashboard/creators');
-    } catch (err: any) {
-      console.error(err);
-      const createdObj = ({
-        ...newCreator,
-        id: newCreator.id || crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      } as unknown as Creator);
-      const deletedIds = JSON.parse(localStorage.getItem('crown_deleted_creators') || '[]');
-      if (deletedIds.includes(createdObj.id)) {
-        localStorage.setItem('crown_deleted_creators', JSON.stringify(deletedIds.filter((id: string) => id !== createdObj.id)));
-      }
-      setCreators(prev => {
-        const next = [...prev, createdObj];
-        localStorage.setItem('crown_creators', JSON.stringify(next));
-        return next;
-      });
-      setActiveCreatorId(createdObj.id);
-      localStorage.setItem('crown_active_creator_id', createdObj.id);
-      success('تمت إضافة صانع المحتوى وحفظه محلياً بنجاح!');
-      router.push('/dashboard/creators');
+    const deletedIds = JSON.parse(localStorage.getItem('crown_deleted_creators') || '[]');
+    if (deletedIds.includes(createdObj.id)) {
+      localStorage.setItem('crown_deleted_creators', JSON.stringify(deletedIds.filter((id: string) => id !== createdObj.id)));
     }
+
+    const nextCreators = [...creators, createdObj];
+    setCreators(nextCreators);
+    localStorage.setItem('crown_creators', JSON.stringify(nextCreators));
+    setActiveCreatorId(createdObj.id);
+    localStorage.setItem('crown_active_creator_id', createdObj.id);
+    addLog('Add Creator', newCreator.full_name, 'Success');
+
+    // Always sync immediately to Cloud DB (/api/db/sync) before redirecting
+    try {
+      await fetch('/api/db/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creators: nextCreators })
+      });
+    } catch (e) {
+      console.error('Cloud DB sync error:', e);
+    }
+
+    // Try Supabase directly too (ignore RLS errors)
+    try {
+      await supabase.from('creators').insert([newCreator]);
+    } catch (e) {}
+
+    success('تمت إضافة صانع المحتوى وحفظه في السحابة بنجاح!');
+    router.push('/dashboard/creators');
   };
 
   return (

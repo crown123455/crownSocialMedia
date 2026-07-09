@@ -58,16 +58,44 @@ export default function SyncCenterPage() {
     }, 2000);
   };
 
+  const handleForceCloudSync = async () => {
+    try {
+      await fetch('/api/db/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creators, accounts })
+      });
+      success('تمت مزامنة كافة الحسابات وصناع المحتوى مع السحابة بنجاح!');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleResetDB = async () => {
+    if (!window.confirm('هل أنت متأكد من رغبتك في إعادة تهيئة وفرمتة قاعدة البيانات؟')) return;
+    try {
+      await fetch('/api/db/reset', { method: 'POST' });
+      localStorage.clear();
+      success('تمت فرمتة قاعدة البيانات بنجاح! سيتم إعادة تحميل الصفحة...');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (e) {}
+  };
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} dir="rtl">
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Data Sync Center</h1>
-          <p className={styles.subtitle}>Manage background jobs and manual API synchronizations.</p>
+          <h1 className={styles.title}>مركز المزامنة وقاعدة البيانات السحابية</h1>
+          <p className={styles.subtitle}>إدارة المزامنة السحابية الدائمة وفرمتة/إعادة تهيئة البيانات السحابية والمحلية.</p>
         </div>
-        <Button variant="primary">
-          <RefreshCw size={16} /> Sync All Enabled
-        </Button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <Button variant="primary" onClick={handleForceCloudSync}>
+            <RefreshCw size={16} /> مزامنة وحفظ في السحابة
+          </Button>
+          <Button variant="outline" onClick={handleResetDB} style={{ borderColor: '#ef4444', color: '#dc2626' }}>
+            🗑️ فرمتة قاعدة البيانات
+          </Button>
+        </div>
       </div>
 
       <div className={styles.grid}>

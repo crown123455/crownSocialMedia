@@ -76,6 +76,31 @@ export default function AdvancedSettingsPage() {
     success('تم حفظ جميع الإعدادات المتقدمة لكافة صناع المحتوى بنجاح!');
   };
 
+  const handleResetCloudDB = async () => {
+    if (!window.confirm('هل أنت متأكد من رغبتك في إعادة تهيئة وفرمتة قاعدة البيانات السحابية والمحلية للبدء من جديد؟')) return;
+    try {
+      await fetch('/api/db/reset', { method: 'POST' });
+      localStorage.clear();
+      success('تمت فرمتة وإعادة تهيئة قاعدة البيانات بنجاح! سيتم إعادة تحميل الصفحة...');
+      setTimeout(() => window.location.reload(), 1500);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleForceSync = async () => {
+    try {
+      await fetch('/api/db/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creators, accounts, posts, postTargets, creatorSchedules })
+      });
+      success('تمت مزامنة كافة البيانات والحفظ السحابي بنجاح!');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   return (
     <div style={{ padding: '32px', background: '#f8fafc', minHeight: 'calc(100vh - 80px)', direction: 'rtl', fontFamily: 'inherit' }}>
       {/* Header */}
@@ -92,6 +117,26 @@ export default function AdvancedSettingsPage() {
         <Button variant="primary" size="lg" onClick={handleSaveAll} style={{ background: '#2563eb', color: '#fff', borderRadius: '14px', padding: '12px 28px', fontWeight: 'bold', boxShadow: '0 4px 12px rgba(37,99,235,0.2)' }}>
           <Sparkles size={18} /> حفظ جميع الإعدادات
         </Button>
+      </div>
+
+      {/* Cloud Database Control Card */}
+      <div style={{ background: '#ffffff', padding: '24px 32px', borderRadius: '24px', border: '1px solid #e2e8f0', boxShadow: '0 4px 20px rgba(0,0,0,0.03)', marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+        <div>
+          <h3 style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span>☁️ إدارة التخزين السحابي وقاعدة البيانات</span>
+          </h3>
+          <p style={{ margin: 0, color: '#64748b', fontSize: '14px' }}>
+            يمكنك حفظ ومزامنة كافة البيانات الحالية فوراً في السحابة، أو إعادة تهيئة (فرمتة) قاعدة البيانات للبدء من جديد.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <Button variant="outline" size="md" onClick={handleForceSync} style={{ borderRadius: '12px', fontWeight: 'bold', border: '1px solid #3b82f6', color: '#2563eb' }}>
+            ⚡ مزامنة وحفظ فوري
+          </Button>
+          <Button variant="outline" size="md" onClick={handleResetCloudDB} style={{ borderRadius: '12px', fontWeight: 'bold', border: '1px solid #ef4444', color: '#dc2626' }}>
+            🗑️ فرمتة وإعادة تهيئة قاعدة البيانات
+          </Button>
+        </div>
       </div>
 
       {/* Creators List */}
