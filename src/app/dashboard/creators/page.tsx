@@ -23,16 +23,30 @@ export default function CreatorsPage() {
     c.display_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleResetAll = async () => {
+    if (!window.confirm('هل أنت متأكد من مسح جميع صناع المحتوى وتفريغ القائمة بالكامل للبدء من جديد؟')) return;
+    try {
+      await fetch('/api/db/reset', { method: 'POST' });
+    } catch (e) {}
+    localStorage.clear();
+    window.location.reload();
+  };
+
   return (
-    <div className={styles.container}>
+    <div className={styles.container} dir="rtl">
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Creators</h1>
-          <p className={styles.subtitle}>Manage your content creators and their contracts.</p>
+          <h1 className={styles.title}>قائمة صناع المحتوى (Creators)</h1>
+          <p className={styles.subtitle}>إدارة صناع المحتوى وحساباتهم وعقودهم السحابية.</p>
         </div>
-        <Button variant="primary" onClick={() => router.push('/dashboard/creators/new')}>
-          <Plus size={16} /> Add Creator
-        </Button>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <Button variant="primary" onClick={() => router.push('/dashboard/creators/new')}>
+            <Plus size={16} /> إضافة صانع محتوى
+          </Button>
+          <Button variant="outline" onClick={handleResetAll} style={{ borderColor: '#ef4444', color: '#dc2626', fontWeight: 'bold' }}>
+            🗑️ مسح وتفريغ كافة البيانات (تصفير القائمة)
+          </Button>
+        </div>
       </div>
 
       <div className={styles.filters}>
@@ -40,21 +54,21 @@ export default function CreatorsPage() {
           <Search size={18} className="text-gray" />
           <input 
             className={styles.searchInput}
-            placeholder="Search by name or handle..." 
+            placeholder="البحث بالاسم أو المعرف..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline"><Filter size={16} /> Filter</Button>
+        <Button variant="outline"><Filter size={16} /> تصفية</Button>
       </div>
 
       {filteredCreators.length === 0 ? (
         <EmptyState 
           icon={Users}
-          title="No creators found"
-          description={searchTerm ? "Try adjusting your search criteria." : "Get started by adding your first content creator."}
+          title="لا يوجد صناع محتوى"
+          description={searchTerm ? "حاول تعديل معايير البحث." : "ابدأ بإضافة أول صانع محتوى في قائمتك."}
           action={!searchTerm && (
-            <Button onClick={() => router.push('/dashboard/creators/new')}>Add Creator</Button>
+            <Button onClick={() => router.push('/dashboard/creators/new')}>إضافة صانع محتوى</Button>
           )}
         />
       ) : (
@@ -63,7 +77,7 @@ export default function CreatorsPage() {
             const creatorAccounts = accounts.filter(a => a.creator_id === creator.id);
             return (
               <Card key={creator.id} interactive className={styles.creatorCard} onClick={() => router.push(`/dashboard/creators/${creator.id}`)}>
-                <div className={styles.cardHeader}>
+                <div className={styles.cardHeader} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div className={styles.avatarWrap}>
                     {creator.profile_photo ? (
                       <img src={creator.profile_photo} alt={creator.display_name} className={styles.avatar} />
@@ -71,35 +85,60 @@ export default function CreatorsPage() {
                       <div className={styles.avatarFallback}>{creator.display_name.charAt(0)}</div>
                     )}
                   </div>
-                  <div className="relative">
-                    <button 
-                      className={styles.moreBtn} 
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button
+                      type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        setOpenMenuId(openMenuId === creator.id ? null : creator.id);
+                        if (window.confirm(`هل أنت متأكد من حذف صانع المحتوى (${creator.full_name})؟`)) {
+                          deleteCreator(creator.id);
+                        }
                       }}
+                      style={{
+                        background: '#fee2e2',
+                        color: '#dc2626',
+                        border: '1px solid #fca5a5',
+                        borderRadius: '8px',
+                        padding: '6px 12px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                      title="حذف صانع المحتوى"
                     >
-                      <MoreVertical size={18} />
+                      🗑️ حذف
                     </button>
-                    
-                    {openMenuId === creator.id && (
-                      <div 
-                        className={styles.dropdownMenu} 
-                        onClick={(e) => e.stopPropagation()}
+                    <div className="relative">
+                      <button 
+                        className={styles.moreBtn} 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenMenuId(openMenuId === creator.id ? null : creator.id);
+                        }}
                       >
-                        <button 
-                          className={styles.dropdownItemDelete}
-                          onClick={() => {
-                            if (window.confirm('هل أنت متأكد من حذف صانع المحتوى هذا؟')) {
-                              deleteCreator(creator.id);
-                            }
-                            setOpenMenuId(null);
-                          }}
+                        <MoreVertical size={18} />
+                      </button>
+                      
+                      {openMenuId === creator.id && (
+                        <div 
+                          className={styles.dropdownMenu} 
+                          onClick={(e) => e.stopPropagation()}
                         >
-                          حذف (Delete)
-                        </button>
-                      </div>
-                    )}
+                          <button 
+                            className={styles.dropdownItemDelete}
+                            onClick={() => {
+                              if (window.confirm('هل أنت متأكد من حذف صانع المحتوى هذا؟')) {
+                                deleteCreator(creator.id);
+                              }
+                              setOpenMenuId(null);
+                            }}
+                          >
+                            حذف (Delete)
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <div className={styles.cardBody}>
