@@ -200,6 +200,64 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     if (savedAccountsInit) {
       try { setAccounts(JSON.parse(savedAccountsInit)); } catch (e) {}
     }
+
+    // Sync master state from Cloud DB across devices
+    fetch('/api/db/sync')
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.state) {
+          const st = data.state;
+          if (st.creators && Array.isArray(st.creators) && st.creators.length > 0) {
+            setCreators(prev => {
+              const map = new Map(prev.map(c => [c.id, c]));
+              st.creators.forEach((c: Creator) => map.set(c.id, c));
+              const merged = Array.from(map.values());
+              localStorage.setItem('crown_creators', JSON.stringify(merged));
+              return merged;
+            });
+          }
+          if (st.accounts && Array.isArray(st.accounts) && st.accounts.length > 0) {
+            setAccounts(prev => {
+              const map = new Map(prev.map(a => [a.id, a]));
+              st.accounts.forEach((a: SocialAccount) => map.set(a.id, a));
+              const merged = Array.from(map.values());
+              localStorage.setItem('crown_accounts', JSON.stringify(merged));
+              return merged;
+            });
+          }
+          if (st.posts && Array.isArray(st.posts) && st.posts.length > 0) {
+            setPosts(prev => {
+              const map = new Map(prev.map(p => [p.id, p]));
+              st.posts.forEach((p: Post) => map.set(p.id, p));
+              const merged = Array.from(map.values());
+              localStorage.setItem('crown_posts', JSON.stringify(merged));
+              return merged;
+            });
+          }
+          if (st.postTargets && Array.isArray(st.postTargets) && st.postTargets.length > 0) {
+            setPostTargets(prev => {
+              const map = new Map(prev.map(t => [t.id, t]));
+              st.postTargets.forEach((t: PostTarget) => map.set(t.id, t));
+              const merged = Array.from(map.values());
+              localStorage.setItem('crown_post_targets', JSON.stringify(merged));
+              return merged;
+            });
+          }
+          if (st.creatorSchedules) {
+            setCreatorSchedules(prev => ({ ...prev, ...st.creatorSchedules }));
+          }
+          if (st.media && Array.isArray(st.media) && st.media.length > 0) {
+            setMedia(prev => {
+              const map = new Map(prev.map(m => [m.id, m]));
+              st.media.forEach((m: MediaAsset) => map.set(m.id, m));
+              const merged = Array.from(map.values());
+              localStorage.setItem('crown_media', JSON.stringify(merged));
+              return merged;
+            });
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -221,6 +279,50 @@ export function TenantProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (accounts.length > 0) localStorage.setItem('crown_accounts', JSON.stringify(accounts));
   }, [accounts]);
+
+  // Sync state to Cloud DB across devices
+  useEffect(() => {
+    if (creators.length > 0 || accounts.length > 0 || posts.length > 0) {
+      fetch('/api/db/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ creators, accounts, posts, postTargets, creatorSchedules, media })
+      }).catch(() => {});
+    }
+  }, [creators, accounts, posts, postTargets, creatorSchedules, media]);
+
+  // Auto-Scheduler interval: checks scheduled posts every 10 seconds
+  useEffect(() => {
+    const checkScheduledPosts = async () => {
+      const now = Date.now();
+      const duePosts = posts.filter(p => {
+        if (p.status !== 'scheduled') return false;
+        const schedTime = new Date(p.publish_at || (p as any).scheduled_at || p.created_at).getTime();
+        return schedTime <= now;
+      });
+
+      if (duePosts.length > 0) {
+        setPosts(prev => prev.map(p => {
+          if (duePosts.some(d => d.id === p.id)) {
+            return { ...p, status: 'published' };
+          }
+          return p;
+        }));
+
+        setPostTargets(prev => prev.map(t => {
+          if (duePosts.some(d => d.id === t.post_id)) {
+            return { ...t, status: 'published' as any };
+          }
+          return t;
+        }));
+
+        fetch('/api/cron/run').catch(() => {});
+      }
+    };
+
+    const interval = setInterval(checkScheduledPosts, 10000);
+    return () => clearInterval(interval);
+  }, [posts, postTargets]);
 
   const updateCreatorSchedule = (creatorId: string, config: { days: string[], time: string, enabled: boolean, notifyHoursBefore: number }) => {
     setCreatorSchedules(prev => {
