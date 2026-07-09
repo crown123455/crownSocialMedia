@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import styles from './page.module.css';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Users } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 export default function CreatorsPage() {
   const { creators, accounts, deleteCreator } = useTenant();
@@ -25,6 +26,14 @@ export default function CreatorsPage() {
 
   const handleResetAll = async () => {
     if (!window.confirm('هل أنت متأكد من مسح جميع صناع المحتوى وتفريغ القائمة بالكامل للبدء من جديد؟')) return;
+    try {
+      await Promise.all([
+        supabase.from('creators').delete().neq('id', '0'),
+        supabase.from('social_accounts').delete().neq('id', '0'),
+        supabase.from('posts').delete().neq('id', '0'),
+        supabase.from('media_assets').delete().neq('id', '0')
+      ]);
+    } catch (e) {}
     try {
       await fetch('/api/db/reset', { method: 'POST' });
     } catch (e) {}

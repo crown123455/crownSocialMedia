@@ -84,23 +84,27 @@ export default function AddCreatorPage() {
     localStorage.setItem('crown_active_creator_id', createdObj.id);
     addLog('Add Creator', newCreator.full_name, 'Success');
 
-    // Always sync immediately to Cloud DB (/api/db/sync) before redirecting
+    // Directly save to external Supabase from browser
     try {
-      await fetch('/api/db/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creators: nextCreators })
-      });
+      const { error: sbError } = await supabase.from('creators').upsert([
+        {
+          id: createdObj.id,
+          full_name: createdObj.full_name,
+          display_name: createdObj.display_name || createdObj.full_name,
+          category: createdObj.category || 'Business',
+          monthly_content_target: createdObj.monthly_content_target || 30,
+          profile_photo: createdObj.profile_photo || '',
+          contract_status: createdObj.contract_status || 'active'
+        }
+      ]);
+      if (sbError) {
+        console.error('Supabase direct upsert error:', sbError);
+      }
     } catch (e) {
-      console.error('Cloud DB sync error:', e);
+      console.error('Supabase direct upsert exception:', e);
     }
 
-    // Try Supabase directly too (ignore RLS errors)
-    try {
-      await supabase.from('creators').insert([newCreator]);
-    } catch (e) {}
-
-    success('تمت إضافة صانع المحتوى وحفظه في السحابة بنجاح!');
+    success('تمت إضافة صانع المحتوى وحفظه في قاعدة البيانات الخارجية بنجاح!');
     router.push('/dashboard/creators');
   };
 

@@ -280,16 +280,8 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     if (accounts.length > 0) localStorage.setItem('crown_accounts', JSON.stringify(accounts));
   }, [accounts]);
 
-  // Sync state to Cloud DB across devices
-  useEffect(() => {
-    if (creators.length > 0 || accounts.length > 0 || posts.length > 0) {
-      fetch('/api/db/sync', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ creators, accounts, posts, postTargets, creatorSchedules, media })
-      }).catch(() => {});
-    }
-  }, [creators, accounts, posts, postTargets, creatorSchedules, media]);
+  // Data is synced directly to external Supabase from browser client
+
 
   // Auto-Scheduler interval: checks scheduled posts every 10 seconds
   useEffect(() => {
