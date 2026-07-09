@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './layout.module.css';
@@ -25,11 +25,11 @@ import {
   RefreshCw,
   FileText,
   Menu,
-  X
+  X,
+  LogOut
 } from 'lucide-react';
 import { TenantProvider, useTenant } from '@/store/TenantContext';
 import { CreatorSelector } from '@/components/ui/CreatorSelector';
-import { useState } from 'react';
 
 const navItems = [
   { name: 'نظرة عامة (Overview)', href: '/dashboard', icon: LayoutDashboard },
@@ -59,6 +59,18 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { activeCreator, creatorSchedules } = useTenant();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const hasSession = document.cookie.includes('crown_session=');
+    if (!hasSession) {
+      router.replace('/login');
+    }
+  }, [router]);
+
+  const handleLogout = () => {
+    document.cookie = 'crown_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    router.replace('/login');
+  };
 
   const currentSchedule = activeCreator ? creatorSchedules[activeCreator.id] : null;
   const isScheduleActive = currentSchedule && currentSchedule.enabled;
@@ -130,6 +142,26 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </Button>
             <button className={styles.iconBtn} onClick={() => router.push('/dashboard/settings')} title="Advanced Scheduling">
               <Bell size={20} />
+            </button>
+            <button 
+              onClick={handleLogout}
+              style={{
+                background: '#ef4444',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '6px 12px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+                fontSize: '13px'
+              }}
+              title="تسجيل الخروج (Logout)"
+            >
+              <LogOut size={16} />
+              خروج
             </button>
             <div className={styles.userAvatar}>
               A
